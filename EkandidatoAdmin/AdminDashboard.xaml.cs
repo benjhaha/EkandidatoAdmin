@@ -1,14 +1,11 @@
-﻿using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
-using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using Microsoft.Maui.ApplicationModel;
+
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
+
 using System.Windows.Input;
-using System.Threading.Tasks;
+
 
 namespace EkandidatoAdmin;
 
@@ -75,7 +72,7 @@ public partial class AdminDashboard : ContentPage
         var panel = DrawerPanelView;
         var backdrop = BackdropView;
         if (host is null || panel is null || backdrop is null)
-            return Task.CompletedTask; 
+            return Task.CompletedTask; // XAML not ready yet
 
         _drawerOpen = true;
 
@@ -124,14 +121,20 @@ public class AdminDashboardVm : BindableObject
     public ObservableCollection<AdminCandidate> Candidates { get; } = new();
 
     // Commands
+
     public ICommand LogoutCommand { get; }
     public ICommand AddCandidateCommand { get; }
-    public ICommand GoToVotingCommand { get; }
+    public ICommand ToVotingCommand { get; }
     public ICommand ManageSettingsCommand { get; }
     public ICommand PrevMonthCommand { get; }
     public ICommand NextMonthCommand { get; }
     public ICommand AddEventCommand { get; }
     public ICommand DeleteEventCommand { get; }
+    public ICommand AboutUsCommand { get; }
+    public ICommand ProfileCommand { get; }
+    public ICommand PollHistoryCommand { get; }
+    
+
 
     // Calendar
     public ObservableCollection<DayCell> Days { get; } = new();
@@ -168,16 +171,34 @@ public class AdminDashboardVm : BindableObject
             await (Page() ?? Shell.Current)?.DisplayAlert("Logout", "Implement your logout flow here.", "OK"));
 
         // Navigation calls 
-        AddCandidateCommand = new Command(async () =>
-            await Shell.Current.GoToAsync(nameof(AddNewCandidates)));
-
-        GoToVotingCommand = new Command(async () =>
-            await Shell.Current.GoToAsync(nameof(VotingPage)));
+        AddCandidateCommand = new Command(async () => 
+        {
+            await Shell.Current.GoToAsync(nameof(AddNewCandidates));
+        });
+        ToVotingCommand = new Command(async () =>
+        { 
+                await Shell.Current.GoToAsync(nameof(VotingPage));
+        });
 
         ManageSettingsCommand = new Command(async () =>
-            await (Page() ?? Shell.Current)?.DisplayAlert("Settings", "Open your election settings page.", "OK"));
+        {
+            await Shell.Current.GoToAsync(nameof(ManageSettings));
+        });
+        AboutUsCommand = new Command(async () =>
+        {
+            await Shell.Current.GoToAsync(nameof(AboutUsPage));
+        });
 
-        
+        ProfileCommand = new Command(async () =>
+        {
+            await Shell.Current.GoToAsync(nameof(AdminProfile));
+        });
+
+        PollHistoryCommand = new Command(async () =>
+        {
+            await Shell.Current.GoToAsync(nameof(CompareCandidates));
+
+        });
 
         PrevMonthCommand = new Command(() =>
         {
@@ -297,6 +318,7 @@ public class AdminDashboardVm : BindableObject
     }
 }
 
+
 /* ===== Models ===== */
 public class AdminCandidate : BindableObject
 {
@@ -375,4 +397,5 @@ public sealed class BoolToOpacityConverter : IValueConverter
         (value is bool b && b) ? 1.0 : 0.45;
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
+
 }
